@@ -18,21 +18,7 @@ namespace IssueTracker.Controllers
         public ActionResult About()
         {
             ViewBag.Message = "Your application description page.";
-
-            var context = new ApplicationDbContext();
-            var userId = User.Identity.GetUserId();
-            var user = context.Users.FirstOrDefault(u => u.Id == userId);
-            context.Issues.Add(new Entities.Issue
-            {
-                Author = user,
-                AuthorId = user.Id,
-                Title = "My First Issue",
-                Description = "Foo Bar Baz",
-                State = Entities.IssueState.New,
-                SubmitionDate = DateTime.Today
-            });
-            context.SaveChanges();
-
+            
             return View();
         }
 
