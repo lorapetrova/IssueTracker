@@ -17,5 +17,7 @@ namespace IssueTracker.Entities
         public string AuthorId { get; set; }
         public IssueState State { get; set; }
         public DateTime SubmitionDate { get; set; }
+
+        public virtual IList<Comment> Comments { get; set; }
     }
 }

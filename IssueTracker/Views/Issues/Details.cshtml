@@ -13,11 +13,11 @@
     <hr />
     <dl class="dl-horizontal">
         <dt>
-            @Html.DisplayNameFor(model => model.Author.Email)
+            @Html.DisplayNameFor(model => model.Author.UserName)
         </dt>
 
         <dd>
-            @Html.DisplayFor(model => model.Author.Email)
+            @Html.DisplayFor(model => model.Author.UserName)
         </dd>
 
         <dt>
@@ -54,6 +54,7 @@
 
     </dl>
 </div>
+
 <p>
     @if (User.CanAdministrateIssue(Model.Author.UserName))
     {
@@ -62,3 +63,56 @@
     }
     @Html.ActionLink("Back to List", "Index")
 </p>
+
+<div>
+    <h4>Comments</h4>
+
+    <div class="add-comment-wrapper">
+        @Html.AntiForgeryToken()
+        <div class="form-group">
+            <input id="txtAuthor" class="form-control" type="text" name="Author" placeholder="Author" value="@(User.Identity.IsAuthenticated ? User.Identity.Name : string.Empty)" />
+        </div>
+        <div class="form-group">
+            <textarea id="txtComment" class="form-control" type="text" name="Comment" rows="2" placeholder="Comment"></textarea>
+        </div>
+        <button id="btnAddComment" class="btn btn-add btn-default btn-sm pull-right">+ Add</button>
+        <div class="clearfix"></div>
+    </div>
+
+    <hr />
+    @foreach (var item in Model.Comments)
+    {
+        <section class="comment">
+            <header>@item.AuthorName</header>
+            <content>@item.Content</content>
+        </section>
+    }
+</div>
+
+@section scripts {
+    <script>
+        $(function () {
+            $('#btnAddComment').on('click', function () {
+                var author = $('#txtAuthor').val();
+                var comment = $('#txtComment').val();
+                var aft = $('.add-comment-wrapper input[name=__RequestVerificationToken]').val();
+
+                if (author && comment) {
+                    $.ajax({
+                        url: '@Url.Action("Create", "Comments")',
+                        type: 'POST',
+                        data: {
+                            IssueId: parseInt('@Model.Id'),
+                            AuthorName: author,
+                            Content: comment,
+                            __RequestVerificationToken: aft
+                        },
+                        success: function () {
+                            window.location.reload();
+                        }
+                    });
+                }
+            });
+        });
+    </script>
+}

@@ -25,6 +25,10 @@
                     <li>@Html.ActionLink("About", "About", "Home")</li>
                     <li>@Html.ActionLink("Contact", "Contact", "Home")</li>
                     <li>@Html.ActionLink("Issues", "Index", "Issues")</li>
+                    @if (User.IsInRole("Admin"))
+                    {
+                        <li>@Html.ActionLink("Comments", "Index", "Comments")</li>
+                    }
                 </ul>
                 @Html.Partial("_LoginPartial")
             </div>

@@ -8,121 +8,116 @@ using System.Web;
 using System.Web.Mvc;
 using IssueTracker.Entities;
 using IssueTracker.Models;
-using Microsoft.AspNet.Identity;
 
 namespace IssueTracker.Controllers
 {
-    [Authorize]
-    public class IssuesController : Controller
+    [Authorize(Roles = "Admin")]
+    public class CommentsController : Controller
     {
         private ApplicationDbContext db = new ApplicationDbContext();
 
-        [AllowAnonymous]
-        // GET: Issues
+        // GET: Comments
         public ActionResult Index()
         {
-            var issues = db.Issues.Include(i => i.Author);
-            return View(issues.ToList());
+            var comments = db.Comments.Include(c => c.Issue);
+            return View(comments.ToList());
         }
-        
-        [AllowAnonymous]
-        // GET: Issues/Details/5
+
+        // GET: Comments/Details/5
         public ActionResult Details(int? id)
         {
             if (id == null)
             {
                 return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
             }
-            Issue issue = db.Issues.Find(id);
-            if (issue == null)
+            Comment comment = db.Comments.Find(id);
+            if (comment == null)
             {
                 return HttpNotFound();
             }
-            return View(issue);
+            return View(comment);
         }
 
-        // GET: Issues/Create
+        // GET: Comments/Create
+        [AllowAnonymous]
         public ActionResult Create()
         {
+            ViewBag.IssueId = new SelectList(db.Issues, "Id", "Title");
             return View();
         }
 
-        // POST: Issues/Create
+        // POST: Comments/Create
+        [AllowAnonymous]
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public ActionResult Create([Bind(Include = "Id,Title,Description,State")] Issue issue)
+        public ActionResult Create([Bind(Include = "Id,IssueId,AuthorName,Content")] Comment comment)
         {
             if (ModelState.IsValid)
             {
-                var userId = User.Identity.GetUserId();
-                var user = db.Users.FirstOrDefault(u => u.Id == userId);
-
-                issue.Author = user;
-                issue.AuthorId = userId;
-                issue.SubmitionDate = DateTime.Now;
-                db.Issues.Add(issue);
+                db.Comments.Add(comment);
                 db.SaveChanges();
                 return RedirectToAction("Index");
             }
-            
-            return View(issue);
+
+            ViewBag.IssueId = new SelectList(db.Issues, "Id", "Title", comment.IssueId);
+            return View(comment);
         }
 
-        // GET: Issues/Edit/5
+        // GET: Comments/Edit/5
         public ActionResult Edit(int? id)
         {
             if (id == null)
             {
                 return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
             }
-            Issue issue = db.Issues.Find(id);
-            if (issue == null)
+            Comment comment = db.Comments.Find(id);
+            if (comment == null)
             {
                 return HttpNotFound();
             }
-            return View(issue);
+            ViewBag.IssueId = new SelectList(db.Issues, "Id", "Title", comment.IssueId);
+            return View(comment);
         }
 
-        // POST: Issues/Edit/5
+        // POST: Comments/Edit/5
+        // To protect from overposting attacks, please enable the specific properties you want to bind to, for 
+        // more details see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public ActionResult Edit([Bind(Include = "Id,Title,Description,State")] Issue issue)
+        public ActionResult Edit([Bind(Include = "Id,IssueId,AuthorName,Content")] Comment comment)
         {
             if (ModelState.IsValid)
             {
-                var toUpdate = db.Issues.Find(issue.Id);
-                toUpdate.Title = issue.Title;
-                toUpdate.Description = issue.Description;
-                toUpdate.State = issue.State;
-                db.Entry(toUpdate).State = EntityState.Modified;
+                db.Entry(comment).State = EntityState.Modified;
                 db.SaveChanges();
                 return RedirectToAction("Index");
             }
-            return View(issue);
+            ViewBag.IssueId = new SelectList(db.Issues, "Id", "Title", comment.IssueId);
+            return View(comment);
         }
 
-        // GET: Issues/Delete/5
+        // GET: Comments/Delete/5
         public ActionResult Delete(int? id)
         {
             if (id == null)
             {
                 return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
             }
-            Issue issue = db.Issues.Find(id);
-            if (issue == null)
+            Comment comment = db.Comments.Find(id);
+            if (comment == null)
             {
                 return HttpNotFound();
             }
-            return View(issue);
+            return View(comment);
         }
 
-        // POST: Issues/Delete/5
+        // POST: Comments/Delete/5
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
         public ActionResult DeleteConfirmed(int id)
         {
-            Issue issue = db.Issues.Find(id);
-            db.Issues.Remove(issue);
+            Comment comment = db.Comments.Find(id);
+            db.Comments.Remove(comment);
             db.SaveChanges();
             return RedirectToAction("Index");
         }
